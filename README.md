@@ -1,6 +1,8 @@
-# 대한민국 공군 합격 예측 프로그램
+# 대한민국 공군 합격 예측 프로그램  ROKAF Admission Probability Calculator
 
 이 프로그램은 대한민국 공군의 합격 가능성을 예측할 수 있는 파이썬 기반 프로그램입니다. 사용자로부터 필요한 점수를 입력받아 최종 점수와 커트라인 점수를 계산하여 결과를 제공합니다.
+
+![ROKAFlogo](https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Republic_of_Korea_Air_Force_emblem.png/600px-Republic_of_Korea_Air_Force_emblem.png)
 
 ## 기능
 
