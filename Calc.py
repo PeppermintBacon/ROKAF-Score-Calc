@@ -18,8 +18,6 @@ class Ui_MainWindow(object):
         self.label_title.setText("<html><head/><body><p><span style=\" font-size:18pt; font-weight:600;\">대한민국 공군 합격 예측</span></p><p>ROKAF Admission Probability Calculator</p></body></html>")
         self.label_title.setAlignment(QtCore.Qt.AlignCenter)
         self.label_title.setObjectName("label_title")
-
-        # 공군 로고 
         self.label_image = QtWidgets.QLabel(self.centralwidget)
         self.label_image.setGeometry(QtCore.QRect(80, 420, 220, 120))  
         
@@ -135,11 +133,14 @@ class Ui_MainWindow(object):
         return scores
 
     def determine_cutoff_score(self, all_scores, num_recruits, multiplier=1.1):
-        
         num_1st_round = int(num_recruits * multiplier)
         sorted_scores = sorted(all_scores, reverse=True)
-        cutoff_index = min(num_1st_round, len(sorted_scores)) - 1
-        return sorted_scores[cutoff_index] if cutoff_index >= 0 else 0
+        cutoff_score = sorted_scores[num_1st_round - 1] if num_1st_round <= len(sorted_scores) else sorted_scores[-1]
+        while len(sorted_scores) > num_1st_round and sorted_scores[num_1st_round] == cutoff_score:
+            num_1st_round += 1
+    
+        return sorted_scores[num_1st_round - 1] if num_1st_round > 0 else 0
+
 
 
     def show_result_window(self, result_text):
