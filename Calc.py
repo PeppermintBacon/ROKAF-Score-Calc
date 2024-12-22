@@ -79,20 +79,26 @@ class Ui_MainWindow(object):
         if not self.validate_inputs(inputs):
             QtWidgets.QMessageBox.warning(None, "Input Error", "모든 입력은 유효해야 합니다.")
             return
-
         total_score = self.calculate_total_score(inputs)
         simulated_scores = self.generate_sample_scores(inputs['num_applicants'])
-        cutoff_score = self.determine_cutoff_score(simulated_scores, inputs['num_recruits'])
-
-        result_text = f"1차 최종 점수: {int(total_score)}\n점수 컷: {int(cutoff_score)}\n"
-        if total_score >= cutoff_score:
+        cutoff_score_1st = self.determine_cutoff_score(simulated_scores, int(inputs['num_recruits'] * 1.1))
+        if total_score >= cutoff_score_1st:
             final_score = total_score + inputs['interview']
-            result_text += f"최종 점수: {int(final_score)}\n"
-            result_text += "축하드립니다! 합격입니다! 안전한 군생활을 응원합니다!" if final_score >= cutoff_score + 34 else "불합격"
+            final_scores = [score + random.uniform(34, 35) for score in simulated_scores if score >= cutoff_score_1st]
+            final_scores.append(final_score) 
+            cutoff_score_final = self.determine_cutoff_score(final_scores, inputs['num_recruits'])
+            result_text = f"1차 최종 점수: {int(total_score)}\n1차 컷: {int(cutoff_score_1st)}\n"
+            result_text += f"최종 점수: {int(final_score)}\n최종 컷: {int(cutoff_score_final)}\n"
+            if final_score >= cutoff_score_final:
+                result_text += "축하드립니다! 합격입니다! 안전한 군생활을 응원합니다!"
+            else:
+                result_text += "불합격입니다. 다음 달에 지원해보세요!\n"
         else:
-            result_text += "불합격입니다. 다음 달에 지원해보세요!\n"
+            result_text = f"1차 최종 점수: {int(total_score)}\n1차 컷: {int(cutoff_score_1st)}\n불합격입니다. 다음 달에 지원해보세요!\n"
 
         self.show_result_window(result_text)
+
+
 
     def validate_inputs(self, inputs):
         schema = {
@@ -128,10 +134,13 @@ class Ui_MainWindow(object):
                 scores.append(random.choice(list(range(76, 96)) + list(range(100, 106))))
         return scores
 
-    def determine_cutoff_score(self, all_scores, num_recruits):
+    def determine_cutoff_score(self, all_scores, num_recruits, multiplier=1.1):
+        
+        num_1st_round = int(num_recruits * multiplier)
         sorted_scores = sorted(all_scores, reverse=True)
-        cutoff_index = min(num_recruits, len(sorted_scores)) - 1
+        cutoff_index = min(num_1st_round, len(sorted_scores)) - 1
         return sorted_scores[cutoff_index] if cutoff_index >= 0 else 0
+
 
     def show_result_window(self, result_text):
         if self.second_window is None:
