@@ -80,25 +80,32 @@ class Ui_MainWindow(object):
 
         total_score = self.calculate_total_score(inputs)
         simulated_scores = self.generate_sample_scores(inputs['num_applicants'])
+        
         cutoff_score_1st = self.determine_cutoff_score(simulated_scores, int(inputs['num_recruits'] * 1.1))
 
-        if total_score >= cutoff_score_1st:
+        
+        if inputs['num_recruits'] >= inputs['num_applicants']:
             final_score = total_score + inputs['interview']
-            final_scores = [score + random.choice([34, 35]) for score in simulated_scores if score >= cutoff_score_1st]
-            final_scores.append(final_score) 
-            cutoff_score_final = self.determine_cutoff_score(final_scores, inputs['num_recruits'])
-            
             result_text = f"1차 최종 점수: {int(total_score)}\n1차 컷: {int(cutoff_score_1st)}\n"
-            result_text += f"최종 점수: {int(final_score)}\n최종 컷: {int(cutoff_score_final)}\n"
-            
-            if final_score >= cutoff_score_final:
-                result_text += "축하드립니다! 합격입니다! 안전한 군생활을 응원합니다!"
-            else:
-                result_text += "불합격입니다. 다음 달에 지원해보세요!\n"
+            result_text += f"최종 점수: {int(final_score)}\n합격입니다! 안전한 군생활을 응원합니다!"
         else:
-            result_text = f"1차 최종 점수: {int(total_score)}\n1차 컷: {int(cutoff_score_1st)}\n불합격입니다. 다음 달에 지원해보세요!\n"
+            if total_score >= cutoff_score_1st:
+                final_score = total_score + inputs['interview']
+                final_scores = [score + random.choice([34, 35]) for score in simulated_scores if score >= cutoff_score_1st]
+                final_scores.append(final_score) 
+                cutoff_score_final = self.determine_cutoff_score(final_scores, inputs['num_recruits'])
+                result_text = f"1차 최종 점수: {int(total_score)}\n1차 컷: {int(cutoff_score_1st)}\n"
+                result_text += f"최종 점수: {int(final_score)}\n최종 컷: {int(cutoff_score_final)}\n"
+                
+                if final_score >= cutoff_score_final:
+                    result_text += "합격입니다! 안전한 군생활을 응원합니다!"
+                else:
+                    result_text += "불합격입니다. 다음 달에 지원해보세요!\n"
+            else:
+                result_text = f"1차 최종 점수: {int(total_score)}\n1차 컷: {int(cutoff_score_1st)}\n불합격입니다. 다음 달에 지원해보세요!\n"
 
         self.show_result_window(result_text)
+
 
 
 
@@ -138,15 +145,25 @@ class Ui_MainWindow(object):
         return scores
 
     def determine_cutoff_score(self, all_scores, num_recruits, multiplier=1.1):
+        if not all_scores:  
+            return 0
+
         num_1st_round = int(num_recruits * multiplier)
         sorted_scores = sorted(all_scores, reverse=True)
-        cutoff_score = sorted_scores[num_1st_round - 1] if num_1st_round <= len(sorted_scores) else sorted_scores[-1]
-        sorted_scores = sorted(all_scores, reverse=True)
-        cutoff_score_2nd = sorted_scores[num_recruits - 1] if num_recruits <= len(sorted_scores) else sorted_scores[-1]
+
+        
+        if num_1st_round > len(sorted_scores):
+            cutoff_score = sorted_scores[-1]  
+        else:
+            cutoff_score = sorted_scores[min(num_1st_round - 1, len(sorted_scores) - 1)]
+        if num_recruits > len(sorted_scores):
+            cutoff_score_2nd = sorted_scores[-1] 
+        else:
+            cutoff_score_2nd = sorted_scores[min(num_recruits - 1, len(sorted_scores) - 1)]
         while len(sorted_scores) > num_recruits and sorted_scores[num_recruits] == cutoff_score_2nd:
             num_recruits += 1
 
-        return sorted_scores[num_recruits - 1] if num_recruits > 0 else 0
+        return sorted_scores[min(num_recruits - 1, len(sorted_scores) - 1)] if num_recruits > 0 else 0
 
 
 
